@@ -62,20 +62,18 @@ export default function Home() {
             const emailIndex: any = excelData[0].indexOf('Email')
             if (emailIndex === -1) {
                 console.error(`Column Email not found.`)
-                return null
+            } else {
+                setEmail(excelData[excelDataRowNo][emailIndex])
             }
             // @ts-ignore
             const personLinkedInIndex: any = excelData[0].indexOf('Person Linkedin URL')
             if (personLinkedInIndex === -1) {
                 console.error(`Column Person Linkedin URL not found.`)
-                return null
+            } else {
+                setPersonLinkedInUrl(excelData[excelDataRowNo][personLinkedInIndex])
             }
-            setPersonLinkedInUrl(excelData[excelDataRowNo][personLinkedInIndex])
-            setEmail(excelData[excelDataRowNo][emailIndex])
             const columnData: any = excelData[excelDataRowNo][columnIndex]
             let data: string
-            debugger
-            console.log(word, columnData)
             if (outputEmailBody) {
                 data = outputEmailBody.replace(word, columnData)
                 setOutputEmailBody(data)
