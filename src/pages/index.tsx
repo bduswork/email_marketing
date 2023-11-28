@@ -153,19 +153,19 @@ export default function Home() {
             </div>
 
             <div className="w-2/4 mt-5">
-                <label htmlFor="Subject Line" className="block text-sm font-medium leading-6 text-white-900">
+                <label htmlFor="Subject Line" className="block text-sm font-medium leading-6 text-white">
                     Subject Line
                 </label>
                 <div className=" mt-2">
                     <input
                         id="subjectLine"
                         name="subjectLine"
-                        className="block bg-gray-400 w-full rounded-md border-b-white border-2 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block bg-gray-400 w-full rounded-md border-b-white border-2 px-1.5 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         value={subjectLine}
                         onChange={(e) => setSubjectLine(e.target.value)}
                     />
                 </div>
-                <p className="mt-3 text-sm leading-6 text-gray-600">Paste Your Subject Line here</p>
+                <p className="mt-3 text-sm leading-6 text-gray-400">Paste Your Subject Line here</p>
             </div>
             {
                 subjectLine ? (
@@ -178,7 +178,7 @@ export default function Home() {
             }
 
             <div className="w-2/4 mt-5">
-                <label htmlFor="Email Body" className="block text-sm font-medium leading-6 text-white-900">
+                <label htmlFor="Email Body" className="block text-sm font-medium leading-6 text-white">
                     Email Body
                 </label>
                 <div className=" mt-2">
@@ -194,7 +194,7 @@ export default function Home() {
                     onChange={(e) => setEmailBody(e.target.value)}
                 />
                 </div>
-                <p className="mt-3 text-sm leading-6 text-gray-600">Paste Your Email Body here</p>
+                <p className="mt-3 text-sm leading-6 text-gray-400">Paste Your Email Body here</p>
             </div>
 
 
