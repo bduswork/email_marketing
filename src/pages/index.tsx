@@ -1,5 +1,5 @@
 import {Inter} from 'next/font/google'
-import {Button} from "flowbite-react"
+import {Button, Textarea} from "flowbite-react"
 import InptutFieldComponent from "@/Components/InptutFieldComponent"
 import React, {useState} from "react"
 import LogoImage from "@/Components/LogoImage"
@@ -21,6 +21,7 @@ export default function Home() {
     const [subjectCopy, setSubjectCopy] = useState(false)
     const [email, setEmail] = useState("")
     const [personLinkedInUrl, setPersonLinkedInUrl] = useState("")
+    const [initialValue, setInitialValue] = useState(0)
 
 
     const buttonOnClick = () => {
@@ -81,6 +82,7 @@ export default function Home() {
                 data = emailBody.replace(word, columnData)
                 setOutputEmailBody(data)
             }
+            setInitialValue(1)
         }
     }
 
@@ -137,10 +139,10 @@ export default function Home() {
     // todo: add react-email to send email.
     return (
         <main
-            className={`flex min-h-screen flex-col items-center p-24 ${inter.className}`}
+            className={`flex min-h-screen flex-col items-center p-1 ${inter.className}`}
         >
             <div className="mb-2">
-                <LogoImage/>
+                {/*<LogoImage/>*/}
             </div>
 
             <div className="w-2/4">
@@ -182,14 +184,11 @@ export default function Home() {
                     Email Body
                 </label>
                 <div className=" mt-2">
-                <textarea
+                <Textarea
                     id="emailBody"
                     name="emailBody"
-                    rows={3}
                     className="block w-full rounded-md bg-gray-400 border-b-white border-2 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    style={{
-                        minHeight: "150px"
-                    }}
+
                     value={emailBody}
                     onChange={(e) => setEmailBody(e.target.value)}
                 />
@@ -316,15 +315,11 @@ export default function Home() {
                                 Output Email Body
                             </label>
                             <div className="mt-2">
-                  <textarea
+                  <input
                       id="emailBody"
                       name="emailBody"
-                      rows={3}
                       className="block w-full bg-gray-400 rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       value={outputEmailBody}
-                      style={{
-                          minHeight: "150px"
-                      }}
                       readOnly
                   />
                             </div>
