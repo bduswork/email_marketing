@@ -3,9 +3,10 @@ import { Button } from "flowbite-react";
 
 interface InputFieldComponentProps {
     dataChange: (word: string, columnName: string) => void;
+    excelHeader: string[]
 }
 
-const InptutFieldComponent: React.FC<InputFieldComponentProps> = ({ dataChange }) => {
+const InptutFieldComponent: React.FC<InputFieldComponentProps> = ({dataChange, excelHeader}) => {
     const [word, setWord] = useState("");
     const [columnName, setColumnName] = useState("");
     const [buttonClick, setButtonClick] = useState(true)
@@ -39,13 +40,20 @@ const InptutFieldComponent: React.FC<InputFieldComponentProps> = ({ dataChange }
                     Column Name
                 </label>
                 <div className="mt-2 ">
-                    <input
-                        type="text"
+                    <select
                         name="columnName"
                         id="columnName"
-                        className="w-[220px] rounded-md bg-gray-400 border-1 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        value={columnName}
+                        className="w-[220px] rounded-md bg-gray-400 border-1 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         onChange={(e) => setColumnName(e.target.value)}
-                    />
+                    >
+                        <option value="" disabled>Select a column</option>
+                        {excelHeader.map((header, index) => (
+                            <option key={index} value={header}>
+                                {header}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
             {
@@ -58,7 +66,6 @@ const InptutFieldComponent: React.FC<InputFieldComponentProps> = ({ dataChange }
                                 </svg>
                             </Button>
                         </div>
-
                     </> : null
             }
         </div>

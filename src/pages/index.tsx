@@ -28,6 +28,7 @@ export default function Home() {
     const [showSubjectLineInput, setShowSubjectLineInput] = useState(true)
     const [showEmailBodyInput, setShowEmailBodyInput] = useState(true)
     const [initialValue, setInitialValue] = useState(0)
+    const [excelHeader, setExcelHeader] = useState<string[]>([])
 
 
     const buttonOnClick = () => {
@@ -53,35 +54,17 @@ export default function Home() {
         {
             return null;
         }
-        subjectColumnData.map((body, index) => {
-            subjectLineReplacing(body.word, body.columnName)
-        })
-    }
+        let data: null | string = subjectLine
 
-    const subjectLineReplacing = (word: string, columnName: string) => {
-        let columnIndex
-        if (excelData) {
+        subjectColumnData.map((body) => {
             // @ts-ignore
-            columnIndex = excelData[0].indexOf(columnName)
-            if (columnIndex === -1) {
-                console.error(`Column '${columnName}' not found.`)
-                return null
-            }
-            const columnData: any = excelData[excelDataRowNo][columnIndex]
-            let data: string
-            if (subjectOutput) {
-                data = subjectLine.replace(word, columnData)
-                setSubjectOutput(data)
-            } else {
-                data = subjectLine.replace(word, columnData)
-                setSubjectOutput(data)
-            }
-        }
+            data = emailBodyReplacing(body.word, body.columnName, data)
+        })
+        setSubjectOutput(data)
     }
 
     const emailBodyReplacing = (word: string, columnName: string, body: string | null) => {
         let columnIndex: any
-        debugger
         if (excelData) {
             // @ts-ignore
             columnIndex = excelData[0].indexOf(columnName)
@@ -120,7 +103,7 @@ export default function Home() {
             return null;
         }
         let data: null | string = emailBody
-        bodyColumnData.map((body, index) => {
+        bodyColumnData.map((body) => {
             // @ts-ignore
             data = emailBodyReplacing(body.word, body.columnName, data)
         })
@@ -153,12 +136,12 @@ export default function Home() {
             const jsonData: any | [] = XLSX.utils.sheet_to_json(ws, {header: 1})
             const headers: string[] = jsonData[0] || []
             setExcelData(jsonData)
+            setExcelHeader(headers)
         }
         reader.readAsBinaryString(file)
     }
 
     const nextButtonOnclick = () => {
-        debugger
         if (initialValue === 0)
         {
             setExcelDataRowNo(excelDataRowNo + 2)
@@ -241,7 +224,7 @@ export default function Home() {
                             subjectLine ? (
                                 <>
                                     <div className="justify-between w-2/4">
-                                        <InptutFieldComponent dataChange={handleSubjectBody}/>
+                                        <InptutFieldComponent dataChange={handleSubjectBody} excelHeader={excelHeader}/>
                                     </div>
                                 </>
                             ) : null
@@ -249,8 +232,6 @@ export default function Home() {
                     </>
                 ) : null
             }
-
-
 
             {
                 showEmailBodyInput ? (
@@ -264,7 +245,6 @@ export default function Home() {
                                     id="emailBody"
                                     name="emailBody"
                                     className="block w-full rounded-md bg-gray-400 border-b-white border-2 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-
                                     value={emailBody}
                                     onChange={(e) => setEmailBody(e.target.value)}
                                 />
@@ -275,7 +255,7 @@ export default function Home() {
                             <div className="justify-between w-2/4">
                                 {Array.from({length: componentCount}, (_, index) => (
                                     <div key={index}>
-                                        <InptutFieldComponent dataChange={handleEmailBody}/>
+                                        <InptutFieldComponent dataChange={handleEmailBody} excelHeader={excelHeader}/>
                                     </div>
                                 ))}
                                 <div className="flex mb-8">
@@ -409,7 +389,7 @@ export default function Home() {
                             <Button
                                 className="mt-5 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
                                 style={{alignSelf: 'center'}}
-                                size="sm"
+                                size="xs"
                                 onClick={handleCopyClick}
                             >
                                 {isCopied ? 'Copied' : 'Click to copy'}
@@ -420,12 +400,13 @@ export default function Home() {
 
             </div>
 
-            <div className="flex mt-10 space-x-20">
+            <div className="flex mt-5 space-x-20">
                 {
                     excelDataRowNo > 1 ? (
                         <Button
                             onClick={handleBack}
-                            className="mr-8 text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                            className="mr-8 text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                            size="xs" >
                             Back
                         </Button>
                     ) : null
@@ -435,7 +416,8 @@ export default function Home() {
                     excelDataRowNo < excelData?.length ? (
                         <Button
                             className="text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                            onClick={nextButtonOnclick}>
+                            onClick={nextButtonOnclick}
+                            size="xs">
                             Next
                         </Button>
 
