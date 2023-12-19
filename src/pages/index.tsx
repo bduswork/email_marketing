@@ -2,13 +2,15 @@ import {Inter} from 'next/font/google'
 import {Button, Textarea} from "flowbite-react"
 import InptutFieldComponent from "@/Components/InptutFieldComponent"
 import React, {useState} from "react"
-import LogoImage from "@/Components/LogoImage"
 import * as XLSX from "xlsx"
 import Footer from "@/Components/Footer"
 
 
 const inter = Inter({subsets: ['latin']})
-
+interface MyData {
+    word: string;
+    columnName: string;
+}
 export default function Home() {
     const [componentCount, setComponentCount] = useState(1)
     const [emailBody, setEmailBody] = useState("")
@@ -21,6 +23,10 @@ export default function Home() {
     const [subjectCopy, setSubjectCopy] = useState(false)
     const [email, setEmail] = useState("")
     const [personLinkedInUrl, setPersonLinkedInUrl] = useState("")
+    const [bodyColumnData, setBodyColumnData] = useState<MyData[]>([])
+    const [subjectColumnData, setSubjectColumnData] = useState<MyData[]>([])
+    const [showSubjectLineInput, setShowSubjectLineInput] = useState(true)
+    const [showEmailBodyInput, setShowEmailBodyInput] = useState(true)
     const [initialValue, setInitialValue] = useState(0)
 
 
@@ -29,6 +35,30 @@ export default function Home() {
     }
 
     const handleSubjectBody = (word: string, columnName: string) => {
+        const dataExists: any = subjectColumnData.some(item =>
+            item.word === word && item.columnName === columnName
+        );
+        if (!dataExists)
+        {
+            setSubjectColumnData(prevColumnData => [
+                ...prevColumnData,
+                { word: word, columnName: columnName }
+            ])
+        }
+    }
+
+    const handleSubjectDoneButton = () => {
+        setShowSubjectLineInput(false)
+        if (subjectColumnData.length <= 0)
+        {
+            return null;
+        }
+        subjectColumnData.map((body, index) => {
+            subjectLineReplacing(body.word, body.columnName)
+        })
+    }
+
+    const subjectLineReplacing = (word: string, columnName: string) => {
         let columnIndex
         if (excelData) {
             // @ts-ignore
@@ -49,8 +79,9 @@ export default function Home() {
         }
     }
 
-    const handleEmailBody = (word: string, columnName: string) => {
-        let columnIndex
+    const emailBodyReplacing = (word: string, columnName: string, body: string | null) => {
+        let columnIndex: any
+        debugger
         if (excelData) {
             // @ts-ignore
             columnIndex = excelData[0].indexOf(columnName)
@@ -74,17 +105,41 @@ export default function Home() {
                 setPersonLinkedInUrl(excelData[excelDataRowNo][personLinkedInIndex])
             }
             const columnData: any = excelData[excelDataRowNo][columnIndex]
-            let data: string
-            if (outputEmailBody) {
-                data = outputEmailBody.replace(word, columnData)
-                setOutputEmailBody(data)
-            } else {
-                data = emailBody.replace(word, columnData)
-                setOutputEmailBody(data)
+            if (body)
+            {
+                body = body.replace(word, columnData)
+                return body
             }
-            setInitialValue(1)
+
         }
     }
+    const handleBodyData = () => {
+        setShowEmailBodyInput(false)
+        if (bodyColumnData.length <= 0)
+        {
+            return null;
+        }
+        let data: null | string = emailBody
+        bodyColumnData.map((body, index) => {
+            // @ts-ignore
+            data = emailBodyReplacing(body.word, body.columnName, data)
+        })
+        setOutputEmailBody(data)
+    }
+
+    const handleEmailBody = (word: string, columnName: string) => {
+        const dataExists: any = bodyColumnData.some(item =>
+            item.word === word && item.columnName === columnName
+        );
+        if (!dataExists)
+        {
+            setBodyColumnData(prevColumnData => [
+                ...prevColumnData,
+                { word: word, columnName: columnName }
+            ])
+        }
+    }
+
 
     const fileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const [file]: any = e.target.files
@@ -97,17 +152,25 @@ export default function Home() {
             const ws: XLSX.WorkSheet = wb.Sheets[wsname]
             const jsonData: any | [] = XLSX.utils.sheet_to_json(ws, {header: 1})
             const headers: string[] = jsonData[0] || []
-            console.log(headers)
             setExcelData(jsonData)
         }
         reader.readAsBinaryString(file)
     }
 
     const nextButtonOnclick = () => {
-        setExcelDataRowNo(excelDataRowNo + 1)
+        debugger
+        if (initialValue === 0)
+        {
+            setExcelDataRowNo(excelDataRowNo + 2)
+            setInitialValue(1)
+        } else {
+            setExcelDataRowNo(excelDataRowNo + 1)
+        }
         setOutputEmailBody("")
         setSubjectOutput("")
         setEmail("")
+        handleSubjectDoneButton()
+        handleBodyData()
     }
 
     const handleSubjectLineCopy = () => {
@@ -134,6 +197,8 @@ export default function Home() {
         setOutputEmailBody("")
         setSubjectOutput("")
         setEmail("")
+        handleSubjectDoneButton()
+        handleBodyData()
     }
 
     // todo: add react-email to send email.
@@ -154,63 +219,81 @@ export default function Home() {
                     onChange={fileUpload}/>
             </div>
 
-            <div className="w-2/4 mt-5">
-                <label htmlFor="Subject Line" className="block text-sm font-medium leading-6 text-white">
-                    Subject Line
-                </label>
-                <div className=" mt-2">
-                    <input
-                        id="subjectLine"
-                        name="subjectLine"
-                        className="block bg-gray-400 w-full rounded-md border-b-white border-2 px-1.5 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        value={subjectLine}
-                        onChange={(e) => setSubjectLine(e.target.value)}
-                    />
-                </div>
-                <p className="mt-3 text-sm leading-6 text-gray-400">Paste Your Subject Line here</p>
-            </div>
             {
-                subjectLine ? (
+                showSubjectLineInput ? (
                     <>
-                        <div className="justify-between w-2/4">
-                            <InptutFieldComponent dataChange={handleSubjectBody}/>
+                        <div className="w-2/4 mt-5">
+                            <label htmlFor="Subject Line" className="block text-sm font-medium leading-6 text-white">
+                                Subject Line
+                            </label>
+                            <div className=" mt-2">
+                                <input
+                                    id="subjectLine"
+                                    name="subjectLine"
+                                    className="block bg-gray-400 w-full rounded-md border-b-white border-2 px-1.5 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                    value={subjectLine}
+                                    onChange={(e) => setSubjectLine(e.target.value)}
+                                />
+                            </div>
+                            <p className="mt-3 text-sm leading-6 text-gray-400">Paste Your Subject Line here</p>
                         </div>
+                        {
+                            subjectLine ? (
+                                <>
+                                    <div className="justify-between w-2/4">
+                                        <InptutFieldComponent dataChange={handleSubjectBody}/>
+                                    </div>
+                                </>
+                            ) : null
+                        }
                     </>
                 ) : null
             }
 
-            <div className="w-2/4 mt-5">
-                <label htmlFor="Email Body" className="block text-sm font-medium leading-6 text-white">
-                    Email Body
-                </label>
-                <div className=" mt-2">
-                <Textarea
-                    id="emailBody"
-                    name="emailBody"
-                    className="block w-full rounded-md bg-gray-400 border-b-white border-2 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-
-                    value={emailBody}
-                    onChange={(e) => setEmailBody(e.target.value)}
-                />
-                </div>
-                <p className="mt-3 text-sm leading-6 text-gray-400">Paste Your Email Body here</p>
-            </div>
 
 
-            {excelData && emailBody ?
-                <div className="justify-between w-2/4">
-                    {Array.from({length: componentCount}, (_, index) => (
-                        <div key={index}>
-                            <InptutFieldComponent dataChange={handleEmailBody}/>
+            {
+                showEmailBodyInput ? (
+                    <>
+                        <div className="w-2/4 mt-5">
+                            <label htmlFor="Email Body" className="block text-sm font-medium leading-6 text-white">
+                                Email Body
+                            </label>
+                            <div className=" mt-2">
+                                <Textarea
+                                    id="emailBody"
+                                    name="emailBody"
+                                    className="block w-full rounded-md bg-gray-400 border-b-white border-2 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+
+                                    value={emailBody}
+                                    onChange={(e) => setEmailBody(e.target.value)}
+                                />
+                            </div>
+                            <p className="mt-3 text-sm leading-6 text-gray-400">Paste Your Email Body here</p>
                         </div>
-                    ))}
-                    <Button
-                        className="mt-10 mx-auto text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
+                        {excelData && emailBody ?
+                            <div className="justify-between w-2/4">
+                                {Array.from({length: componentCount}, (_, index) => (
+                                    <div key={index}>
+                                        <InptutFieldComponent dataChange={handleEmailBody}/>
+                                    </div>
+                                ))}
+                                <div className="flex mb-8">
+                                    <Button
+                                        className="mt-10 mx-auto text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
                         hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium
                         rounded-lg text-sm px-5 py-2.5 text-center"
-                        size="xs" onClick={buttonOnClick}>Add</Button>
-                </div>
-                : null}
+                                        size="xs" onClick={buttonOnClick}>
+                                        Add
+                                    </Button>
+                                </div>
+                            </div>
+                            : null
+                        }
+                    </>
+                ) : null
+            }
+
             <br/>
 
 
@@ -315,13 +398,13 @@ export default function Home() {
                                 Output Email Body
                             </label>
                             <div className="mt-2">
-                  <input
-                      id="emailBody"
-                      name="emailBody"
-                      className="block w-full bg-gray-400 rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      value={outputEmailBody}
-                      readOnly
-                  />
+                                <input
+                                    id="emailBody"
+                                    name="emailBody"
+                                    className="block w-full bg-gray-400 rounded-md border-0 py-2.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                    value={outputEmailBody}
+                                    readOnly
+                                />
                             </div>
                             <Button
                                 className="mt-5 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
